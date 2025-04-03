@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON to CSS Variables</title>
+    <style id="dynamic-styles"></style>
+  </head>
+  <body>
+    <h2>JSON 입력</h2>
+    <textarea id="json-input" rows="10" cols="50">
+{
+  "Reference": {
+    "color": {
+      "common": {
+        "0": { "value": "#ffffff", "type": "color" },
+        "100": { "value": "#000000", "type": "color" }
+      },
+      "cool_neutral": {
+        "0": { "value": "{color.common.0}", "type": "color" },
+        "5": { "value": "#f8f9fa", "type": "color" },
+        "10": { "value": "#f1f3f5", "type": "color" }
+      }
+    }
+  }
+}
+    </textarea>
+    <br />
+    <button id="convert-btn">변환하기</button>
+    <button id="copy-btn" style="display: none">CSS 복사하기</button>
+    <h2>변환된 CSS</h2>
+    <pre id="output"></pre>
+
+    <script>
+      document
+        .getElementById("convert-btn")
+        .addEventListener("click", function () {
+          try {
+            const jsonData = JSON.parse(
+              document.getElementById("json-input").value
+            );
+
+            function flattenJson(obj, prefix = "") {
+              let result = {};
+              for (let key in obj) {
+                if (typeof obj[key] === "object" && !("value" in obj[key])) {
+                  Object.assign(
+                    result,
+                    flattenJson(obj[key], `${prefix}${key}-`)
+                  );
+                } else if ("value" in obj[key]) {
+                  result[`${prefix}${key}`] = obj[key].value;
+                }
+              }
+              return result;
+            }
+
+            function resolveReferences(cssVars) {
+              let resolvedVars = {};
+              for (let key in cssVars) {
+                let value = cssVars[key];
+                let match = value.match(/\{(.*?)\}/);
+                if (match) {
+                  let refKey = match[1].replace(/\./g, "-");
+                  if (cssVars[refKey]) {
+                    resolvedVars[key] = `var(--${refKey})`;
+                  }
+                } else {
+                  resolvedVars[key] = value;
+                }
+              }
+              return resolvedVars;
+            }
+
+            function generateCSS(vars) {
+              return (
+                `:root {\n` +
+                Object.entries(vars)
+                  .map(([key, value]) => `  --${key}: ${value};`)
+                  .join("\n") +
+                `\n}`
+              );
+            }
+
+            const flatVars = flattenJson(jsonData.Reference);
+            const resolvedVars = resolveReferences(flatVars);
+            const css = generateCSS(resolvedVars);
+
+            document.getElementById("dynamic-styles").textContent = css;
+            document.getElementById("output").innerText = css;
+
+            // 복사 버튼 보이기
+            document.getElementById("copy-btn").style.display = "inline-block";
+          } catch (error) {
+            document.getElementById("output").innerText =
+              "❌ JSON 파싱 오류: 올바른 JSON 형식인지 확인하세요.";
+            document.getElementById("copy-btn").style.display = "none";
+          }
+        });
+
+      // CSS 복사 기능
+      document
+        .getElementById("copy-btn")
+        .addEventListener("click", function () {
+          const cssText = document.getElementById("output").innerText;
+          navigator.clipboard
+            .writeText(cssText)
+            .then(() => {
+              alert("✅ 변환된 CSS가 복사되었습니다!");
+            })
+            .catch((err) => {
+              alert("❌ 복사에 실패했습니다.");
+              console.error(err);
+            });
+        });
+    </script>
+  </body>
+</html>
