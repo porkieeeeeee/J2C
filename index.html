@@ -22,6 +22,16 @@
         "10": { "value": "#f1f3f5", "type": "color" }
       }
     }
+  },
+  "System": {
+    "theme": {
+      "dark": { "value": "#333333", "type": "color" }
+    }
+  },
+  "Component": {
+    "button": {
+      "primary": { "value": "{Reference.color.common.0}", "type": "color" }
+    }
   }
 }
     </textarea>
@@ -40,16 +50,28 @@
               document.getElementById("json-input").value
             );
 
+            function transformKey(key) {
+              if (key === "Reference") return "ref";
+              if (key === "System") return "sys";
+              if (key === "Component") return ""; // Component는 변수명에서 제외
+              return key;
+            }
+
             function flattenJson(obj, prefix = "") {
               let result = {};
               for (let key in obj) {
+                let newPrefix = transformKey(key);
+
+                // Component는 prefix를 추가하지 않음
+                let finalPrefix =
+                  key === "Component"
+                    ? prefix
+                    : (prefix ? prefix + "-" : "") + newPrefix;
+
                 if (typeof obj[key] === "object" && !("value" in obj[key])) {
-                  Object.assign(
-                    result,
-                    flattenJson(obj[key], `${prefix}${key}-`)
-                  );
+                  Object.assign(result, flattenJson(obj[key], finalPrefix));
                 } else if ("value" in obj[key]) {
-                  result[`${prefix}${key}`] = obj[key].value;
+                  result[finalPrefix] = obj[key].value;
                 }
               }
               return result;
@@ -61,7 +83,7 @@
                 let value = cssVars[key];
                 let match = value.match(/\{(.*?)\}/);
                 if (match) {
-                  let refKey = match[1].replace(/\./g, "-");
+                  let refKey = match[1].split(".").map(transformKey).join("-");
                   if (cssVars[refKey]) {
                     resolvedVars[key] = `var(--${refKey})`;
                   }
@@ -82,7 +104,7 @@
               );
             }
 
-            const flatVars = flattenJson(jsonData.Reference);
+            const flatVars = flattenJson(jsonData);
             const resolvedVars = resolveReferences(flatVars);
             const css = generateCSS(resolvedVars);
 
