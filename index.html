@@ -1,45 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="kr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JSON to CSS Variables</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="./index.css" />
   </head>
   <body>
-    <h2>JSON 입력</h2>
-    <textarea id="json-input" rows="10" cols="50">
-{
-  "Reference": {
-    "color": {
-      "common": {
-        "0": { "value": "#ffffff", "type": "color" },
-        "100": { "value": "#000000", "type": "color" }
-      },
-      "cool_neutral": {
-        "0": { "value": "{color.common.0}", "type": "color" },
-        "5": { "value": "#f8f9fa", "type": "color" },
-        "10": { "value": "#f1f3f5", "type": "color" }
-      }
-    }
-  },
-  "System": {
-    "theme": {
-      "dark": { "value": "#333333", "type": "color" }
-    }
-  },
-  "Component": {
-    "button": {
-      "primary": { "value": "{Reference.color.common.0}", "type": "color" }
-    }
-  }
-}
-    </textarea>
-    <br />
-    <button id="convert-btn">변환하기</button>
-    <button id="copy-btn" style="display: none">CSS 복사하기</button>
-    <h2>변환된 CSS</h2>
-    <pre id="output"></pre>
+    <header>
+      <h1>JSON to CSS Variables</h1>
+    </header>
+    <main>
+      <div class="container">
+        <div class="translator-wrap json-wrap">
+          <div class="translator-header">JSON</div>
+          <div class="translator-value-box">
+            <textarea
+              id="json-input"
+              placeholder="JSON을 입력하세요"></textarea>
+            <button class="delete-btn">
+              <svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                data-papago-icons="solid">
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  fill="black"
+                  d="M19.4571 5.16728C19.8476 5.55781 19.8476 6.19097 19.4571 6.5815L13.4142 12.6244L19.4571 18.6673C19.8476 19.0578 19.8476 19.691 19.4571 20.0815C19.0666 20.472 18.4334 20.472 18.0429 20.0815L12 14.0386L5.95711 20.0815C5.56658 20.472 4.93342 20.472 4.54289 20.0815C4.15237 19.691 4.15237 19.0578 4.54289 18.6673L10.5858 12.6244L4.54289 6.5815C4.15237 6.19097 4.15237 5.55781 4.54289 5.16728C4.93342 4.77676 5.56658 4.77676 5.95711 5.16728L12 11.2102L18.0429 5.16728C18.4334 4.77676 19.0666 4.77676 19.4571 5.16728Z"></path>
+              </svg>
+              <span class="blind">텍스트 삭제</span>
+            </button>
+          </div>
+        </div>
+        <div class="translator-wrap css-var-wrap">
+          <div class="translator-header">CSS Variables</div>
+          <div class="translator-value-box">
+            <p id="output"></p>
+            <button class="copy-btn" id="copy-btn" style="display: none">
+              CSS 복사하기
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
 
     <script src="./index.js"></script>
   </body>
