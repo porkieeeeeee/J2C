@@ -5,9 +5,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const copyBtn = document.getElementById("copy-btn");
 
   function transformKey(key) {
-    if (key === "Reference") return "ref";
-    if (key === "System") return "sys";
-    if (key === "Component") return "";
+    if (key === "reference") return "ref";
+    if (key === "system") return "sys";
+    if (key === "component") return "com";
     return key;
   }
 
@@ -31,19 +31,31 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function resolveReferences(cssVars) {
-    let resolvedVars = {};
-    for (let key in cssVars) {
-      let value = cssVars[key];
-      let match = value.match(/\{(.*?)\}/);
+    const resolvedVars = {};
+
+    function resolveValue(value, currentKey) {
+      const match = value.match(/\{(.*?)\}/);
       if (match) {
-        let refKey = match[1].split(".").map(transformKey).join("-");
-        if (cssVars[refKey]) {
-          resolvedVars[key] = `var(--${refKey})`;
+        const rawPath = match[1];
+        const refKey = rawPath.replace(/\./g, "-");
+
+        if (currentKey.includes("com-")) {
+          return `var(--sys-${refKey})`;
+        } else if (currentKey.includes("sys-")) {
+          return `var(--ref-${refKey})`;
+        } else if (currentKey.includes("ref-")) {
+          return `var(--ref-${refKey})`;
+        } else {
+          return `var(--${refKey})`;
         }
-      } else {
-        resolvedVars[key] = value;
       }
+      return value;
     }
+
+    for (const key in cssVars) {
+      resolvedVars[key] = resolveValue(cssVars[key], key);
+    }
+
     return resolvedVars;
   }
 
@@ -68,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
       output.innerText = css;
       copyBtn.style.display = "inline-block";
     } catch (error) {
-      output.innerText = "❌ JSON 파싱 오류: 올바른 JSON 형식인지 확인하세요.";
+      output.innerText = "❌ JSON 파싱 오류: " + error.message;
       copyBtn.style.display = "none";
     }
     updateUI();
