@@ -14,14 +14,17 @@ document.addEventListener("DOMContentLoaded", function () {
   function flattenJson(obj, prefix = "") {
     let result = {};
     for (let key in obj) {
-      let newPrefix = transformKey(key);
-      let finalPrefix =
+      const current = obj[key];
+      const newPrefix = transformKey(key);
+      const finalPrefix =
         key === "Component" ? prefix : (prefix ? prefix + "-" : "") + newPrefix;
 
-      if (typeof obj[key] === "object" && !("value" in obj[key])) {
-        Object.assign(result, flattenJson(obj[key], finalPrefix));
-      } else if ("value" in obj[key]) {
-        result[finalPrefix] = obj[key].value;
+      if (current && typeof current === "object") {
+        if ("value" in current) {
+          result[finalPrefix] = current.value;
+        } else {
+          Object.assign(result, flattenJson(current, finalPrefix));
+        }
       }
     }
     return result;
