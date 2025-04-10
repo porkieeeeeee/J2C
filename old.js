@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function transformKey(key) {
     if (key === "reference") return "ref";
+    if (key === "system") return "sys";
     if (key === "component") return "com";
     return key;
   }
@@ -39,6 +40,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const refKey = rawPath.replace(/\./g, "-");
 
         if (currentKey.includes("com-")) {
+          return `var(--sys-${refKey})`;
+        } else if (currentKey.includes("sys-")) {
           return `var(--ref-${refKey})`;
         } else if (currentKey.includes("ref-")) {
           return `var(--ref-${refKey})`;
